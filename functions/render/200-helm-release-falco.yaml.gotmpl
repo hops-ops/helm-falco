@@ -1,0 +1,55 @@
+# code: language=yaml
+#
+# Helm release for Falco - runtime security
+#
+# Defaults:
+# - Uses modern eBPF driver (no kernel module needed)
+# - Enables Falcosidekick for alert forwarding
+# - Configures JSON output for structured logging
+#
+
+{{- $f := $state.falco }}
+
+---
+apiVersion: helm.m.crossplane.io/v1beta1
+kind: Release
+metadata:
+  name: {{ $f.releaseName }}
+  annotations:
+    {{ setResourceNameAnnotation "helm-release-falco" }}
+  labels: {{ $f.labels | toJson }}
+spec:
+  managementPolicies: {{ $f.managementPolicies | toJson }}
+  forProvider:
+    chart:
+      name: falco
+      repository: https://falcosecurity.github.io/charts
+      version: 4.20.1
+    namespace: {{ $f.namespace }}
+    {{- if $f.overrideAllValues }}
+    values:
+      {{- toYaml $f.overrideAllValues | nindent 6 }}
+    {{- else }}
+    values:
+      fullnameOverride: falco
+      nameOverride: falco
+      # Use modern eBPF driver (recommended, no kernel headers needed)
+      driver:
+        kind: modern_ebpf
+      # Disable TTY for daemon mode
+      tty: false
+      # Enable Falcosidekick for alert forwarding
+      falcosidekick:
+        enabled: true
+      # JSON output for structured logging
+      falco:
+        json_output: true
+        json_include_output_property: true
+      {{- if $f.values }}
+      {{- toYaml $f.values | nindent 6 }}
+      {{- end }}
+    {{- end }}
+  rollbackLimit: 3
+  providerConfigRef:
+    name: {{ $f.providerConfigRef.name }}
+    kind: {{ $f.providerConfigRef.kind }}

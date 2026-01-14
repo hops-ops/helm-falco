@@ -1,0 +1,23 @@
+apiVersion: helm.hops.ops.com.ai/v1alpha1
+kind: Falco
+metadata:
+  name: falco
+  namespace: example-env
+spec:
+  clusterName: example-cluster
+  labels:
+    team: security
+    environment: production
+  providerConfigRef:
+    name: example-cluster
+    kind: ProviderConfig
+  values:
+    # Enable metrics for Prometheus scraping
+    metrics:
+      enabled: true
+    # Configure Falcosidekick outputs
+    falcosidekick:
+      enabled: true
+      config:
+        slack:
+          webhookurl: ""

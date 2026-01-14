@@ -1,0 +1,23 @@
+# code: language=yaml
+#
+# Compute status values from observed state
+#
+
+{{- $f := $state.falco }}
+{{- $obs := $state.observed }}
+
+# ==============================================================================
+# Compute status output
+# ==============================================================================
+
+{{- $helmReady := $obs.helmRelease.ready | default false }}
+{{- $ready := $helmReady }}
+
+{{- $state = set $state "status" (dict
+  "ready" $ready
+  "release" (dict
+    "name" $f.releaseName
+    "namespace" $f.namespace
+    "ready" $helmReady
+  )
+) }}

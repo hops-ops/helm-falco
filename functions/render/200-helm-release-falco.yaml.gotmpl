@@ -31,8 +31,6 @@ spec:
       {{- toYaml $f.overrideAllValues | nindent 6 }}
     {{- else }}
     values:
-      fullnameOverride: falco
-      nameOverride: falco
       # Use modern eBPF driver (recommended, no kernel headers needed)
       driver:
         kind: modern_ebpf
